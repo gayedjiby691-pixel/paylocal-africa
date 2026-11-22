@@ -125,7 +125,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteract
       role,
       organization: org.name,
       country: detectedCountry,
-      allowedCountries: role === 'COMPTABLE' ? ['SN', 'CI', 'CM', 'BJ'] : [detectedCountry],
+      allowedCountries: [detectedCountry],
     });
   };
 
@@ -155,7 +155,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteract
       role: quickRole,
       organization: details.name,
       country: c,
-      allowedCountries: quickRole === 'COMPTABLE' ? ['SN', 'CI', 'CM', 'BJ'] : [c],
+      allowedCountries: [c],
     });
   };
 

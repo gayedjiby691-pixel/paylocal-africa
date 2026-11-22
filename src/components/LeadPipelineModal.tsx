@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { initialLeadsCI, ProspectCI } from '../data/mockLeadsCI';
 import { initialLeadsSN, ProspectSN } from '../data/mockLeadsSN';
+import { initialLeadsCM, ProspectCM } from '../data/mockLeadsCM';
+import { initialLeadsBJ, ProspectBJ } from '../data/mockLeadsBJ';
 import { X, MessageSquare, Download, Phone, MapPin, Users, Briefcase, ShieldCheck } from 'lucide-react';
 import { CountryCode } from '../engine/types';
 
-type Prospect = ProspectCI | ProspectSN;
+type Prospect = ProspectCI | ProspectSN | ProspectCM | ProspectBJ;
 
 interface LeadPipelineModalProps {
   onClose: () => void;
@@ -12,9 +14,28 @@ interface LeadPipelineModalProps {
 }
 
 export const LeadPipelineModal: React.FC<LeadPipelineModalProps> = ({ onClose, userCountry }) => {
-  // Confinement strict : l'utilisateur ne charge et ne voit QUE les données de son propre pays
-  const isSenegal = userCountry === 'SN';
-  const [leads, setLeads] = useState<Prospect[]>(isSenegal ? initialLeadsSN : initialLeadsCI);
+  // Confinement strict souverain : l'utilisateur ne charge et ne voit QUE les données de son propre pays
+  const getInitialLeads = (c: CountryCode): Prospect[] => {
+    switch (c) {
+      case 'SN': return initialLeadsSN;
+      case 'CI': return initialLeadsCI;
+      case 'CM': return initialLeadsCM;
+      case 'BJ': return initialLeadsBJ;
+      default: return initialLeadsSN;
+    }
+  };
+
+  const getCountryMeta = (c: CountryCode) => {
+    switch (c) {
+      case 'SN': return { flag: '🇸🇳', name: 'Sénégal (Dakar)', tag: 'Dakar_Senegal' };
+      case 'CI': return { flag: '🇨🇮', name: 'Côte d\'Ivoire (Abidjan)', tag: 'Abidjan_Cote_d_Ivoire' };
+      case 'CM': return { flag: '🇨🇲', name: 'Cameroun (Douala)', tag: 'Douala_Cameroun' };
+      case 'BJ': return { flag: '🇧🇯', name: 'Bénin (Cotonou)', tag: 'Cotonou_Benin' };
+    }
+  };
+
+  const countryMeta = getCountryMeta(userCountry);
+  const [leads, setLeads] = useState<Prospect[]>(getInitialLeads(userCountry));
   const [selectedSector, setSelectedSector] = useState<string>('ALL');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -43,7 +64,7 @@ export const LeadPipelineModal: React.FC<LeadPipelineModalProps> = ({ onClose, u
   };
 
   const handleDownloadCSV = () => {
-    const territoryLabel = isSenegal ? 'Dakar_Senegal' : 'Abidjan_Cote_d_Ivoire';
+    const territoryLabel = countryMeta.tag;
     let csv = 'ID,Entreprise,Secteur,Quartier,Telephone,Effectif,Interlocuteur,Statut,Message\n';
     leads.forEach((l) => {
       csv += `${l.id},"${l.companyName}",${l.sector},"${l.district}",${l.phone},"${l.estimatedEmployees}","${l.contactPerson}",${l.status},"${l.personalizedMessage.replace(/"/g, '""')}"\n`;
@@ -67,23 +88,23 @@ export const LeadPipelineModal: React.FC<LeadPipelineModalProps> = ({ onClose, u
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-3xl shadow-2xl max-w-5xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[92vh]">
         
-        {/* Header Isolé Souverain (Aucun onglet vers un autre pays) */}
+        {/* Header Isolé Souverain (Strictement confiné au pays connecté) */}
         <div className="px-6 py-4 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 font-black flex items-center justify-center shadow-md shadow-emerald-500/20 text-sm">
-              {isSenegal ? '🇸🇳' : '🇨🇮'}
+              {countryMeta.flag}
             </div>
             <div>
               <div className="flex items-center space-x-2">
                 <h3 className="text-base font-bold text-white">
-                  Pipeline de Prospection Locale • {isSenegal ? 'Territoire Sénégal (Dakar)' : 'Territoire Côte d\'Ivoire (Abidjan)'}
+                  Pipeline de Prospection Locale • Territoire {countryMeta.name}
                 </h3>
                 <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   {totalLeads} Entreprises Qualifiées
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Coordonnées certifiées, décideurs RH/DAF & liens directs de contact WhatsApp
+                Isolation RLS active : données et prospects strictement confinés à ce pays
               </p>
             </div>
           </div>

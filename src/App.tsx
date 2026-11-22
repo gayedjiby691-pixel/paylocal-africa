@@ -116,11 +116,15 @@ export const App: React.FC = () => {
   };
 
   const handleAddEmployee = (newEmp: EmployeeProfile) => {
-    setEmployees((prev) => [newEmp, ...prev]);
+    const sovereignEmp: EmployeeProfile = {
+      ...newEmp,
+      country: selectedCountry,
+    };
+    setEmployees((prev) => [sovereignEmp, ...prev]);
     SecurityAuditService.logAction(
       currentUser?.email || 'session@kalia.ci',
       'EMPLOYEE_CREATED',
-      `Nouveau collaborateur créé : ${newEmp.firstName} ${newEmp.lastName} (${newEmp.country}).`
+      `Nouveau collaborateur créé sur le territoire souverain ${sovereignEmp.country} : ${sovereignEmp.firstName} ${sovereignEmp.lastName}.`
     );
   };
 
@@ -217,7 +221,16 @@ export const App: React.FC = () => {
       <Header
         selectedCountry={selectedCountry}
         onSelectCountry={(c) => {
-          setSelectedCountry(c);
+          if (c !== currentUser.country) {
+            SecurityAuditService.logAction(
+              currentUser.email,
+              'DATA_EXPORTED',
+              `ALERTE SÉCURITÉ : Tentative de basculement non autorisé vers le pays ${c} bloquée par l'isolation souveraine.`,
+              'CRITICAL'
+            );
+            return;
+          }
+          setSelectedCountry(currentUser.country);
           setIsPayoutDone(false);
         }}
         allowedCountries={currentUser.allowedCountries}
