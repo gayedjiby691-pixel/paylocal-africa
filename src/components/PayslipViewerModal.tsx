@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { PayslipResult, EmployeeProfile } from '../engine/types';
+import { PayslipResult, EmployeeProfile, EnterpriseBranding } from '../engine/types';
 import { X, Printer, Send, Check, ShieldCheck, ArrowLeft, Download, Award, CheckCircle2, Lock } from 'lucide-react';
 
 interface PayslipViewerModalProps {
   payslip: PayslipResult | null;
   employee: EmployeeProfile | null;
+  branding?: EnterpriseBranding;
   onClose: () => void;
 }
 
 export const PayslipViewerModal: React.FC<PayslipViewerModalProps> = ({
   payslip,
   employee,
+  branding,
   onClose,
 }) => {
   const [whatsappSent, setWhatsappSent] = useState(false);
@@ -18,6 +20,16 @@ export const PayslipViewerModal: React.FC<PayslipViewerModalProps> = ({
   if (!payslip || !employee) return null;
 
   const formatMoney = (val: number = 0) => val.toLocaleString('fr-FR') + ' FCFA';
+
+  const getBrandGradient = (theme?: string) => {
+    switch (theme) {
+      case 'BLUE': return 'from-blue-600 to-indigo-500';
+      case 'AMBER': return 'from-amber-500 to-orange-500';
+      case 'PURPLE': return 'from-purple-600 to-pink-500';
+      case 'ROSE': return 'from-rose-600 to-red-500';
+      default: return 'from-emerald-600 to-teal-500';
+    }
+  };
 
   const handleSendWhatsApp = () => {
     setWhatsappSent(true);
@@ -130,20 +142,24 @@ export const PayslipViewerModal: React.FC<PayslipViewerModalProps> = ({
             {/* Document Header */}
             <div className="border-b-2 border-slate-900 pb-6 mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white font-black text-lg flex items-center justify-center">
-                    P
+                <div className="flex items-center space-x-2.5">
+                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${getBrandGradient(branding?.brandColor)} text-white font-black text-xl flex items-center justify-center shadow-md`}>
+                    {branding?.logoInitial || 'P'}
                   </div>
                   <div>
-                    <h1 className="text-xl font-black tracking-tight text-slate-900">GROUPE KALIA SARL</h1>
-                    <p className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wider">
-                      Solutions de Sécurité, Services & Technologies
+                    <h1 className="text-xl font-black tracking-tight text-slate-900">
+                      {branding?.companyName || 'GROUPE KALIA SARL'}
+                    </h1>
+                    <p className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
+                      {branding?.tagline || 'Solutions de Sécurité, Services & Technologies'}
                     </p>
                   </div>
                 </div>
                 <div className="text-xs text-slate-500 mt-2 space-y-0.5">
-                  <p>Siège : VDN Sacré-Cœur 3, Dakar (Sénégal) & Plateau, Abidjan (RCI)</p>
-                  <p className="font-mono text-[11px]">NINEA : 009845722G3 • RCCM : SN-DKR-2022-B-1420 • Téléphone : +221 33 800 00 00</p>
+                  <p>Siège : {branding?.headquarters || 'VDN Sacré-Cœur 3, Dakar (Sénégal)'}</p>
+                  <p className="font-mono text-[11px]">
+                    {branding?.legalId || 'NINEA : 009845722G3 • RCCM : SN-DKR-2022-B-1420'} • Téléphone : {branding?.phone || '+221 33 800 00 00'}
+                  </p>
                 </div>
               </div>
 
@@ -348,16 +364,20 @@ export const PayslipViewerModal: React.FC<PayslipViewerModalProps> = ({
             <div className="mt-8 pt-6 border-t border-slate-200 grid grid-cols-2 gap-6 text-xs text-slate-500">
               <div>
                 <p className="font-bold text-slate-800">Pour l'Employeur :</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">Direction des Ressources Humaines</p>
-                <div className="mt-4 h-14 border border-dashed border-slate-300 rounded-xl p-2 flex items-center justify-center text-[10px] text-slate-400">
-                  [Cachet Électronique & Signature]
+                <p className="text-[11px] text-slate-400 mt-0.5">{branding?.customStampTitle || 'Direction Générale'}</p>
+                <div className="mt-3 p-3 border-2 border-dashed border-emerald-600/70 rounded-xl bg-emerald-50/50 text-emerald-950 font-mono text-[9px] text-center space-y-0.5 shadow-sm">
+                  <div className="font-black text-[10px] uppercase">{branding?.companyName || 'GROUPE KALIA SARL'}</div>
+                  <div className="font-bold text-emerald-700">★ VU ET APPROUVÉ • BON POUR PAIEMENT ★</div>
+                  <div className="text-[8px] text-slate-500">Signataire : {branding?.customStampTitle || 'Direction Générale'}</div>
+                  <div className="text-[7px] text-emerald-600 font-bold">HORODATÉ PAR CLÉ SOUVERAINE TLS 1.3</div>
                 </div>
               </div>
               <div className="text-right">
                 <p className="font-bold text-slate-800">Pour le Salarié :</p>
                 <p className="text-[11px] text-slate-400 mt-0.5">Reçu pour solde de tout compte</p>
-                <div className="mt-4 h-14 border border-dashed border-slate-300 rounded-xl p-2 flex items-center justify-center text-[10px] text-slate-400">
-                  [Émargement / Quittance Numérique]
+                <div className="mt-3 h-20 border border-dashed border-slate-300 rounded-xl p-2 flex flex-col items-center justify-center text-[10px] text-slate-400 space-y-1">
+                  <span>[Quittance Numérique Certifiée]</span>
+                  <span className="font-mono text-[9px] text-emerald-600 font-semibold">SMS : « Reçu de {branding?.smsSenderName || 'PAYLOCAL'} »</span>
                 </div>
               </div>
             </div>

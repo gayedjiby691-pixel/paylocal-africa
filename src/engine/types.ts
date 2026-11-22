@@ -97,3 +97,18 @@ export interface PayslipResult {
   paymentProvider: MobileMoneyProvider;
   payoutPhone: string;
 }
+
+export type BrandColorTheme = 'EMERALD' | 'BLUE' | 'AMBER' | 'PURPLE' | 'ROSE';
+
+export interface EnterpriseBranding {
+  companyName: string;
+  tagline: string;
+  legalId: string; // NINEA / RCCM / NIU / IFU
+  headquarters: string;
+  phone: string;
+  brandColor: BrandColorTheme;
+  logoInitial: string;
+  whiteLabelMode: boolean; // Marque blanche (masque la mention PayLocal pour afficher 100% l'entreprise)
+  smsSenderName: string; // Nom de l'expéditeur SMS Mobile Money (Wave / Orange Money)
+  customStampTitle: string; // Titre du signataire officiel (ex: Direction Générale)
+}

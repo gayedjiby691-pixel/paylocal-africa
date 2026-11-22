@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { initialEmployees } from './data/mockEmployees';
-import { EmployeeProfile, CountryCode, PayslipResult } from './engine/types';
+import { EmployeeProfile, CountryCode, PayslipResult, EnterpriseBranding } from './engine/types';
 import { PayrollCalculator } from './engine/payrollCalculator';
+import { defaultBrandings } from './data/defaultBrandings';
 import { Header } from './components/Header';
 import { StatsCards } from './components/StatsCards';
 import { EmployeeTable } from './components/EmployeeTable';
@@ -15,10 +16,11 @@ import { LeadPipelineModal } from './components/LeadPipelineModal';
 import { ArchiveVaultModal } from './components/ArchiveVaultModal';
 import { InteractiveTourModal } from './components/InteractiveTourModal';
 import { RequestDemoModal } from './components/RequestDemoModal';
+import { EnterpriseBrandingModal } from './components/EnterpriseBrandingModal';
 import { LoginModal, UserSession } from './components/LoginModal';
 import { SecurityAuditService } from './security/auditLogger';
 import { EnvValidator } from './security/env';
-import { Sparkles, ShieldCheck, LogOut, User, Target } from 'lucide-react';
+import { Sparkles, ShieldCheck, LogOut, User, Target, Palette } from 'lucide-react';
 
 export const App: React.FC = () => {
   useEffect(() => {
@@ -48,6 +50,34 @@ export const App: React.FC = () => {
   const [showArchiveVault, setShowArchiveVault] = useState<boolean>(false);
   const [showInteractiveTour, setShowInteractiveTour] = useState<boolean>(false);
   const [showDemoRequest, setShowDemoRequest] = useState<boolean>(false);
+  const [showBrandingModal, setShowBrandingModal] = useState<boolean>(false);
+
+  // La « Touche » Sur-Mesure de l'entreprise (Marque, Logo, Couleurs, Cachet)
+  const [branding, setBranding] = useState<EnterpriseBranding>(() => {
+    return defaultBrandings.SN;
+  });
+
+  useEffect(() => {
+    const saved = localStorage.getItem(`paylocal_branding_${selectedCountry}`);
+    if (saved) {
+      try {
+        setBranding(JSON.parse(saved));
+        return;
+      } catch (e) {}
+    }
+    setBranding(defaultBrandings[selectedCountry] || defaultBrandings.SN);
+  }, [selectedCountry]);
+
+  const handleSaveBranding = (updated: EnterpriseBranding) => {
+    setBranding(updated);
+    localStorage.setItem(`paylocal_branding_${selectedCountry}`, JSON.stringify(updated));
+    SecurityAuditService.logAction(
+      currentUser?.email || 'session@paylocal.africa',
+      'SALARY_UPDATED',
+      `Touche sur-mesure personnalisée enregistrée pour l'entreprise : ${updated.companyName} (Thème: ${updated.brandColor}).`,
+      'INFO'
+    );
+  };
 
   // Filtrer les salariés selon le pays sélectionné
   const currentEmployees = useMemo(() => {
@@ -234,7 +264,9 @@ export const App: React.FC = () => {
           setIsPayoutDone(false);
         }}
         allowedCountries={currentUser.allowedCountries}
-        organizationName={currentUser.organization}
+        organizationName={branding.companyName || currentUser.organization}
+        branding={branding}
+        onOpenBranding={() => setShowBrandingModal(true)}
         activePeriod={activePeriod}
         onOpenBulkPayout={() => setShowBulkPayout(true)}
         onOpenTaxExport={() => setShowTaxExport(true)}
@@ -270,6 +302,14 @@ export const App: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-2.5 text-xs shrink-0 relative z-10">
+            <button
+              onClick={() => setShowBrandingModal(true)}
+              className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 font-extrabold px-3 py-2.5 rounded-xl border border-purple-500/40 transition-all flex items-center space-x-1.5 shadow-sm hover:scale-[1.02]"
+              title="Personnaliser la touche visuelle de l'entreprise (Logo, Couleurs, Cachet officiel)"
+            >
+              <Palette className="w-4 h-4 text-purple-400" />
+              <span>Ma Touche</span>
+            </button>
             <button
               onClick={() => setShowInteractiveTour(true)}
               className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-extrabold px-3.5 py-2.5 rounded-xl border border-emerald-500/40 transition-all flex items-center space-x-1.5 shadow-sm hover:scale-[1.02]"
@@ -331,6 +371,7 @@ export const App: React.FC = () => {
         <PayslipViewerModal
           employee={selectedPayslipEmp}
           payslip={currentPayslips.get(selectedPayslipEmp.id) || null}
+          branding={branding}
           onClose={() => setSelectedPayslipEmp(null)}
         />
       )}
@@ -423,6 +464,15 @@ export const App: React.FC = () => {
 
       {showDemoRequest && (
         <RequestDemoModal onClose={() => setShowDemoRequest(false)} />
+      )}
+
+      {showBrandingModal && (
+        <EnterpriseBrandingModal
+          country={selectedCountry}
+          currentBranding={branding}
+          onSave={handleSaveBranding}
+          onClose={() => setShowBrandingModal(false)}
+        />
       )}
 
     </div>

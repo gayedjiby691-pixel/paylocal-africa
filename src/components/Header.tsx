@@ -1,12 +1,14 @@
 import React from 'react';
-import { CountryCode } from '../engine/types';
-import { Building2, Calendar, ShieldCheck, SendHorizontal, FileText, UserPlus, Shield, Target, Lock, FolderArchive, Play } from 'lucide-react';
+import { CountryCode, EnterpriseBranding } from '../engine/types';
+import { Building2, Calendar, ShieldCheck, SendHorizontal, FileText, UserPlus, Shield, Target, Lock, FolderArchive, Play, Palette } from 'lucide-react';
 
 interface HeaderProps {
   selectedCountry: CountryCode;
   onSelectCountry: (country: CountryCode) => void;
   allowedCountries?: CountryCode[];
   organizationName?: string;
+  branding?: EnterpriseBranding;
+  onOpenBranding?: () => void;
   activePeriod: string;
   onOpenBulkPayout: () => void;
   onOpenTaxExport: () => void;
@@ -24,6 +26,8 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectCountry,
   allowedCountries = ['SN'],
   organizationName = 'Groupe Kalia SARL',
+  branding,
+  onOpenBranding,
   activePeriod,
   onOpenBulkPayout,
   onOpenTaxExport,
@@ -46,6 +50,16 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
+  const getBrandGradient = (theme?: string) => {
+    switch (theme) {
+      case 'BLUE': return 'from-blue-600 to-indigo-500 shadow-blue-500/20';
+      case 'AMBER': return 'from-amber-500 to-orange-500 shadow-amber-500/20';
+      case 'PURPLE': return 'from-purple-600 to-pink-500 shadow-purple-500/20';
+      case 'ROSE': return 'from-rose-600 to-red-500 shadow-rose-500/20';
+      default: return 'from-emerald-600 to-teal-500 shadow-emerald-500/20';
+    }
+  };
+
   const currentCountry = getCountryInfo(selectedCountry);
 
   return (
@@ -56,12 +70,18 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Logo & Entreprise */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2.5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold text-xl shadow-md shadow-emerald-500/20">
-                P
-              </div>
+              <button
+                onClick={onOpenBranding}
+                className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${getBrandGradient(branding?.brandColor)} flex items-center justify-center text-white font-black text-xl shadow-md hover:scale-105 transition-transform`}
+                title="Personnaliser la touche visuelle de votre entreprise (Logo, Couleurs, Raison Sociale)"
+              >
+                {branding?.logoInitial || 'P'}
+              </button>
               <div>
                 <div className="flex items-center space-x-1.5">
-                  <span className="font-extrabold text-xl tracking-tight text-slate-900">PayLocal</span>
+                  <span className="font-extrabold text-xl tracking-tight text-slate-900">
+                    {branding?.whiteLabelMode ? (branding.companyName.split(' ')[0] || 'Enterprise') : 'PayLocal'}
+                  </span>
                   <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
                     OHADA / UEMOA
                   </span>
@@ -70,11 +90,21 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
 
-            <div className="hidden lg:flex items-center space-x-2 pl-4 border-l border-slate-200">
+            <button
+              onClick={onOpenBranding}
+              className="hidden lg:flex items-center space-x-2 pl-4 border-l border-slate-200 text-left hover:opacity-80 transition-opacity"
+              title="Modifier la raison sociale et la touche sur-mesure"
+            >
               <Building2 className="w-4 h-4 text-slate-400" />
-              <span className="text-sm font-bold text-slate-800">{organizationName}</span>
-              <span className="text-xs text-slate-400 font-mono">(ID: TENANT-{selectedCountry})</span>
-            </div>
+              <div>
+                <span className="text-sm font-bold text-slate-800 block leading-tight">
+                  {branding?.companyName || organizationName}
+                </span>
+                <span className="text-[10px] text-slate-400 font-mono block">
+                  {branding?.legalId ? branding.legalId.split('•')[0] : `(ID: TENANT-${selectedCountry})`}
+                </span>
+              </div>
+            </button>
           </div>
 
           {/* Sélecteurs Pays & Actions */}
@@ -146,6 +176,18 @@ export const Header: React.FC<HeaderProps> = ({
               <FolderArchive className="w-4 h-4 text-amber-600" />
               <span>Archives</span>
             </button>
+
+            {/* Bouton Personnalisation de Marque (La Touche Sur-Mesure) */}
+            {onOpenBranding && (
+              <button
+                onClick={onOpenBranding}
+                className="flex items-center space-x-1.5 text-xs font-black px-2.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200/80 transition-all shadow-sm"
+                title="Personnaliser la touche visuelle de votre entreprise (Logo, Couleurs, Cachet officiel)"
+              >
+                <Palette className="w-3.5 h-3.5 text-purple-600" />
+                <span className="hidden xl:inline">Ma Touche</span>
+              </button>
+            )}
 
             {/* Bouton Démo Guidée Interactive */}
             <button
