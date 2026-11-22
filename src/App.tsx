@@ -13,6 +13,8 @@ import { TaxDeclarationExportModal } from './components/TaxDeclarationExportModa
 import { SecurityCenterModal } from './components/SecurityCenterModal';
 import { LeadPipelineModal } from './components/LeadPipelineModal';
 import { ArchiveVaultModal } from './components/ArchiveVaultModal';
+import { InteractiveTourModal } from './components/InteractiveTourModal';
+import { RequestDemoModal } from './components/RequestDemoModal';
 import { LoginModal, UserSession } from './components/LoginModal';
 import { SecurityAuditService } from './security/auditLogger';
 import { EnvValidator } from './security/env';
@@ -44,6 +46,8 @@ export const App: React.FC = () => {
   const [showSecurityCenter, setShowSecurityCenter] = useState<boolean>(false);
   const [showLeadPipeline, setShowLeadPipeline] = useState<boolean>(false);
   const [showArchiveVault, setShowArchiveVault] = useState<boolean>(false);
+  const [showInteractiveTour, setShowInteractiveTour] = useState<boolean>(false);
+  const [showDemoRequest, setShowDemoRequest] = useState<boolean>(false);
 
   // Filtrer les salariés selon le pays sélectionné
   const currentEmployees = useMemo(() => {
@@ -162,6 +166,7 @@ export const App: React.FC = () => {
             'INFO'
           );
         }}
+        onStartInteractiveTour={() => setShowInteractiveTour(true)}
       />
     );
   }
@@ -224,6 +229,7 @@ export const App: React.FC = () => {
         onOpenSecurityCenter={() => setShowSecurityCenter(true)}
         onOpenLeadPipeline={() => setShowLeadPipeline(true)}
         onOpenArchives={() => setShowArchiveVault(true)}
+        onOpenTour={() => setShowInteractiveTour(true)}
         isPayoutDone={isPayoutDone}
         isPrivacyMode={isPrivacyMode}
       />
@@ -231,7 +237,7 @@ export const App: React.FC = () => {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Banner Conseil Pro avec raccourci Prospection */}
+        {/* Banner Conseil Pro avec raccourci Prospection & Démo */}
         <div className="mb-6 bg-gradient-to-r from-slate-950 via-emerald-950 to-slate-900 text-white rounded-3xl p-6 shadow-xl shadow-slate-950/10 border border-emerald-500/20 flex flex-col md:flex-row md:items-center md:justify-between gap-5 relative overflow-hidden">
           <div className="absolute top-0 right-1/4 w-64 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
           <div className="space-y-1.5 relative z-10">
@@ -251,6 +257,14 @@ export const App: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-2.5 text-xs shrink-0 relative z-10">
+            <button
+              onClick={() => setShowInteractiveTour(true)}
+              className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-extrabold px-3.5 py-2.5 rounded-xl border border-emerald-500/40 transition-all flex items-center space-x-1.5 shadow-sm hover:scale-[1.02]"
+              title="Lancer la démonstration interactive guidée"
+            >
+              <Sparkles className="w-4 h-4 text-emerald-400" />
+              <span>🎬 Démo Guidée</span>
+            </button>
             <button
               onClick={() => setShowLeadPipeline(true)}
               className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-orange-500/20 flex items-center space-x-2 hover:scale-[1.02]"
@@ -363,6 +377,39 @@ export const App: React.FC = () => {
           country={selectedCountry}
           onClose={() => setShowArchiveVault(false)}
         />
+      )}
+
+      {showInteractiveTour && (
+        <InteractiveTourModal
+          country={selectedCountry}
+          onClose={() => setShowInteractiveTour(false)}
+          onOpenBulkPayout={() => {
+            setShowInteractiveTour(false);
+            setShowBulkPayout(true);
+          }}
+          onOpenPayslipSample={() => {
+            setShowInteractiveTour(false);
+            if (currentEmployees.length > 0) {
+              setSelectedPayslipEmp(currentEmployees[0]);
+            }
+          }}
+          onOpenArchives={() => {
+            setShowInteractiveTour(false);
+            setShowArchiveVault(true);
+          }}
+          onOpenTaxExport={() => {
+            setShowInteractiveTour(false);
+            setShowTaxExport(true);
+          }}
+          onOpenDemoRequest={() => {
+            setShowInteractiveTour(false);
+            setShowDemoRequest(true);
+          }}
+        />
+      )}
+
+      {showDemoRequest && (
+        <RequestDemoModal onClose={() => setShowDemoRequest(false)} />
       )}
 
     </div>

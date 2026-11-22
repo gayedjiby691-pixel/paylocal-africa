@@ -1,6 +1,6 @@
 import React from 'react';
 import { CountryCode } from '../engine/types';
-import { Building2, Calendar, ShieldCheck, SendHorizontal, FileText, UserPlus, Shield, Target, Lock, FolderArchive } from 'lucide-react';
+import { Building2, Calendar, ShieldCheck, SendHorizontal, FileText, UserPlus, Shield, Target, Lock, FolderArchive, Play } from 'lucide-react';
 
 interface HeaderProps {
   selectedCountry: CountryCode;
@@ -14,6 +14,7 @@ interface HeaderProps {
   onOpenSecurityCenter: () => void;
   onOpenLeadPipeline: () => void;
   onOpenArchives: () => void;
+  onOpenTour: () => void;
   isPayoutDone: boolean;
   isPrivacyMode: boolean;
 }
@@ -30,6 +31,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSecurityCenter,
   onOpenLeadPipeline,
   onOpenArchives,
+  onOpenTour,
   isPayoutDone,
   isPrivacyMode,
 }) => {
@@ -209,6 +211,16 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <FolderArchive className="w-4 h-4 text-amber-600" />
               <span>Archives</span>
+            </button>
+
+            {/* Bouton Démo Guidée Interactive */}
+            <button
+              onClick={onOpenTour}
+              className="flex items-center space-x-1.5 text-xs font-black px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-800 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all shadow-sm"
+              title="Lancer la démonstration interactive guidée"
+            >
+              <Play className="w-3.5 h-3.5 fill-emerald-600 text-emerald-600" />
+              <span>Démo Guidée</span>
             </button>
 
             {/* Bouton Payout Mobile Money Principal */}

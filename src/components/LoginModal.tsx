@@ -15,7 +15,8 @@ import {
   ArrowLeft,
   RefreshCw,
   Fingerprint,
-  Sparkles
+  Sparkles,
+  Play
 } from 'lucide-react';
 import { CountryCode } from '../engine/types';
 import { RequestDemoModal } from './RequestDemoModal';
@@ -31,9 +32,10 @@ export interface UserSession {
 
 interface LoginModalProps {
   onLogin: (session: UserSession) => void;
+  onStartInteractiveTour?: () => void;
 }
 
-export const LoginModal: React.FC<LoginModalProps> = ({ onLogin }) => {
+export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteractiveTour }) => {
   const [email, setEmail] = useState('direction@dakar-securite.sn');
   const [password, setPassword] = useState('••••••••••••');
   const [showPassword, setShowPassword] = useState(false);
@@ -439,6 +441,19 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin }) => {
                     </div>
                   </div>
                   <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
+                </button>
+
+                {/* Bouton Lancement Démo Interactive Guidée */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleQuickEnterpriseLogin(email, 'DIRECTEUR', 'Directeur Général (Mode Démo)', detectedCountry);
+                    onStartInteractiveTour?.();
+                  }}
+                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-emerald-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs transition-all flex items-center justify-center space-x-2 shadow-lg shadow-emerald-500/10 group"
+                >
+                  <Play className="w-4 h-4 fill-emerald-400 text-emerald-400 group-hover:scale-110 transition-transform" />
+                  <span>🎬 Lancer la Démo Interactive Guidée (90s)</span>
                 </button>
 
                 {/* Bouton pour nouveaux prospects */}
