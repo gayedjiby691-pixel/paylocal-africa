@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { EmployeeProfile } from '../engine/types';
-import { X, HandCoins, Smartphone, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { X, HandCoins, Smartphone, CheckCircle2, ArrowLeft, AlertCircle, ShieldAlert } from 'lucide-react';
+import { InputSanitizer } from '../security/sanitizer';
 
 interface SalaryAdvanceModalProps {
   employee: EmployeeProfile | null;
@@ -17,18 +18,46 @@ export const SalaryAdvanceModal: React.FC<SalaryAdvanceModalProps> = ({
 }) => {
   const [amount, setAmount] = useState<number>(currentAdvance || 30000);
   const [success, setSuccess] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (!employee) return null;
 
-  const maxAdvanceAllowed = Math.round(employee.baseSalary * 0.5); // Règle d'or : max 50% du salaire de base
+  const maxAdvanceAllowed = Math.round(employee.baseSalary * 0.5); // Règle d'or légale : max 50% du salaire de base OHADA
+  const isOutOfLimits = amount <= 0 || amount > maxAdvanceAllowed;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSaveAdvance(employee.id, amount);
+    setErrorMessage(null);
+
+    // Validation stricte de sécurité financière
+    if (amount <= 0) {
+      setErrorMessage('Le montant de l\'acompte doit être supérieur à 0 FCFA.');
+      return;
+    }
+
+    if (amount > maxAdvanceAllowed) {
+      setErrorMessage(`Le montant dépasse le plafond légal de 50% du salaire de base (${formatMoney(maxAdvanceAllowed)}).`);
+      return;
+    }
+
+    const cleanAmount = InputSanitizer.cleanNumber(amount, 1000, maxAdvanceAllowed, 0);
+    onSaveAdvance(employee.id, cleanAmount);
     setSuccess(true);
     setTimeout(() => {
       onClose();
     }, 1500);
+  };
+
+  const handleAmountChange = (valStr: string) => {
+    const rawVal = Number(valStr);
+    setAmount(rawVal);
+    if (rawVal <= 0) {
+      setErrorMessage('Montant invalide : l\'acompte ne peut pas être nul ou négatif.');
+    } else if (rawVal > maxAdvanceAllowed) {
+      setErrorMessage(`Dépassement du plafond légal de 50% (${formatMoney(maxAdvanceAllowed)}).`);
+    } else {
+      setErrorMessage(null);
+    }
   };
 
   const formatMoney = (val: number) => val.toLocaleString('fr-FR') + ' FCFA';
@@ -104,10 +133,20 @@ export const SalaryAdvanceModal: React.FC<SalaryAdvanceModalProps> = ({
                 max={maxAdvanceAllowed}
                 step="5000"
                 value={amount}
-                onChange={(e) => setAmount(Number(e.target.value))}
-                className="w-full px-4 py-3 rounded-2xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600 text-lg font-black text-slate-900 font-mono"
+                onChange={(e) => handleAmountChange(e.target.value)}
+                className={`w-full px-4 py-3 rounded-2xl border ${
+                  errorMessage ? 'border-red-500 focus:ring-red-500 bg-red-50/30' : 'border-slate-300 focus:ring-purple-600'
+                } focus:outline-none focus:ring-2 text-lg font-black text-slate-900 font-mono`}
                 required
               />
+
+              {/* Message d'erreur de sécurité financière */}
+              {errorMessage && (
+                <div className="flex items-center space-x-1.5 mt-2 text-xs text-red-600 font-bold bg-red-50 p-2.5 rounded-xl border border-red-200">
+                  <ShieldAlert className="w-4 h-4 shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
 
               {/* Raccourcis de montants rapides */}
               <div className="flex items-center gap-2 mt-2">
@@ -116,7 +155,11 @@ export const SalaryAdvanceModal: React.FC<SalaryAdvanceModalProps> = ({
                   <button
                     key={quickVal}
                     type="button"
-                    onClick={() => setAmount(Math.min(quickVal, maxAdvanceAllowed))}
+                    onClick={() => {
+                      const val = Math.min(quickVal, maxAdvanceAllowed);
+                      setAmount(val);
+                      setErrorMessage(null);
+                    }}
                     className="px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold bg-slate-100 hover:bg-purple-100 hover:text-purple-700 text-slate-700 transition-colors"
                   >
                     {quickVal / 1000}k
@@ -135,7 +178,12 @@ export const SalaryAdvanceModal: React.FC<SalaryAdvanceModalProps> = ({
               </button>
               <button
                 type="submit"
-                className="flex-1 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs shadow-md shadow-purple-600/20 transition-all"
+                disabled={isOutOfLimits}
+                className={`flex-1 py-3 rounded-xl text-white font-black text-xs shadow-md transition-all ${
+                  isOutOfLimits
+                    ? 'bg-slate-300 cursor-not-allowed shadow-none'
+                    : 'bg-purple-600 hover:bg-purple-700 shadow-purple-600/20'
+                }`}
               >
                 Valider l'Acompte
               </button>

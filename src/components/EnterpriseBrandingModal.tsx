@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CountryCode, EnterpriseBranding, BrandColorTheme } from '../engine/types';
+import { InputSanitizer } from '../security/sanitizer';
 import { 
   X, 
   Palette, 
@@ -43,7 +44,18 @@ export const EnterpriseBrandingModal: React.FC<EnterpriseBrandingModalProps> = (
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(form);
+    const sanitizedBranding: EnterpriseBranding = {
+      ...form,
+      companyName: InputSanitizer.cleanText(form.companyName, 100),
+      tagline: InputSanitizer.cleanText(form.tagline, 150),
+      legalId: InputSanitizer.cleanText(form.legalId, 50),
+      headquarters: InputSanitizer.cleanText(form.headquarters, 150),
+      phone: InputSanitizer.cleanPhone(form.phone),
+      logoInitial: InputSanitizer.cleanText(form.logoInitial, 4).toUpperCase() || 'P',
+      smsSenderName: InputSanitizer.cleanSmsSender(form.smsSenderName),
+      customStampTitle: InputSanitizer.cleanText(form.customStampTitle, 80),
+    };
+    onSave(sanitizedBranding);
     setSavedSuccess(true);
     setTimeout(() => {
       onClose();

@@ -73,7 +73,7 @@ export const App: React.FC = () => {
     localStorage.setItem(`paylocal_branding_${selectedCountry}`, JSON.stringify(updated));
     SecurityAuditService.logAction(
       currentUser?.email || 'session@paylocal.africa',
-      'SALARY_UPDATED',
+      'BRANDING_UPDATED',
       `Touche sur-mesure personnalisée enregistrée pour l'entreprise : ${updated.companyName} (Thème: ${updated.brandColor}).`,
       'INFO'
     );

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { EmployeeProfile, CountryCode, EmployeeCategory, MobileMoneyProvider } from '../engine/types';
 import { X, UserPlus, Smartphone } from 'lucide-react';
+import { InputSanitizer } from '../security/sanitizer';
 
 interface EmployeeModalProps {
   country: CountryCode;
@@ -129,25 +130,36 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanFirstName = capitalizeWords(InputSanitizer.cleanText(firstName, 50));
+    const cleanLastName = capitalizeWords(InputSanitizer.cleanText(lastName, 50));
+    const cleanJob = capitalizeFirstLetter(InputSanitizer.cleanText(jobTitle, 80)) || 'Agent / Salarié';
+    const cleanPhone = InputSanitizer.cleanPhone(phone);
+    const cleanEmail = email ? InputSanitizer.cleanEmail(email) : undefined;
+    const cleanBaseSalary = InputSanitizer.cleanNumber(baseSalary, 40000, 50000000, 180000);
+    const cleanTransport = InputSanitizer.cleanNumber(transportAllowance, 0, 10000000, 0);
+    const cleanHousing = InputSanitizer.cleanNumber(housingAllowance, 0, 10000000, 0);
+    const cleanFiscalParts = InputSanitizer.cleanNumber(fiscalParts, 1.0, 5.0, 1.0);
+    const cleanChildren = InputSanitizer.cleanNumber(childrenCount, 0, 30, 0);
+
     const newEmp: EmployeeProfile = {
       id: 'emp-' + Date.now(),
       matricule: `EMP-${country}-${Math.floor(100 + Math.random() * 900)}`,
-      firstName: capitalizeWords(firstName.trim()),
-      lastName: capitalizeWords(lastName.trim()),
-      jobTitle: capitalizeFirstLetter(jobTitle.trim()) || 'Agent / Salarié',
-      phone: phone.trim(),
-      email: email.trim() || undefined,
+      firstName: cleanFirstName,
+      lastName: cleanLastName,
+      jobTitle: cleanJob,
+      phone: cleanPhone,
+      email: cleanEmail,
       country,
       category,
-      fiscalParts,
-      childrenCount,
-      baseSalary,
-      transportAllowance,
-      housingAllowance,
+      fiscalParts: cleanFiscalParts,
+      childrenCount: cleanChildren,
+      baseSalary: cleanBaseSalary,
+      transportAllowance: cleanTransport,
+      housingAllowance: cleanHousing,
       functionAllowance: 0,
       otherTaxablePrimes: 0,
       paymentProvider,
-      payoutPhone: phone.trim(),
+      payoutPhone: cleanPhone,
     };
     onSave(newEmp);
     onClose();

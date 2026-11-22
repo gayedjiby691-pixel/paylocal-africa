@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ShieldCheck, 
   Lock, 
@@ -16,11 +16,13 @@ import {
   RefreshCw,
   Fingerprint,
   Sparkles,
-  Play
+  Play,
+  AlertTriangle
 } from 'lucide-react';
 import { CountryCode } from '../engine/types';
 import { RequestDemoModal } from './RequestDemoModal';
 import { SecurityAuditService } from '../security/auditLogger';
+import { InputSanitizer } from '../security/sanitizer';
 
 export interface UserSession {
   email: string;
@@ -97,6 +99,86 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteract
 
   const [authError, setAuthError] = useState<string | null>(null);
 
+  // Protection Anti-Brute-Force & Verrouillage Temporaire (Standards BCEAO/OHADA)
+  const [failedAttempts, setFailedAttempts] = useState<number>(() => {
+    try {
+      return Number(localStorage.getItem('paylocal_auth_fails') || 0);
+    } catch {
+      return 0;
+    }
+  });
+
+  const [lockoutEndTime, setLockoutEndTime] = useState<number | null>(() => {
+    try {
+      const saved = localStorage.getItem('paylocal_auth_lockout');
+      if (saved) {
+        const t = Number(saved);
+        if (t > Date.now()) return t;
+      }
+    } catch {}
+    return null;
+  });
+
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(() => {
+    if (lockoutEndTime && lockoutEndTime > Date.now()) {
+      return Math.ceil((lockoutEndTime - Date.now()) / 1000);
+    }
+    return 0;
+  });
+
+  useEffect(() => {
+    if (!lockoutEndTime) {
+      setRemainingSeconds(0);
+      return;
+    }
+    const updateCountdown = () => {
+      const left = Math.max(0, Math.ceil((lockoutEndTime - Date.now()) / 1000));
+      setRemainingSeconds(left);
+      if (left <= 0) {
+        setLockoutEndTime(null);
+        setFailedAttempts(0);
+        try {
+          localStorage.removeItem('paylocal_auth_lockout');
+          localStorage.removeItem('paylocal_auth_fails');
+        } catch {}
+      }
+    };
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [lockoutEndTime]);
+
+  const triggerFailedAttempt = (reason: string) => {
+    const nextFails = failedAttempts + 1;
+    setFailedAttempts(nextFails);
+    try {
+      localStorage.setItem('paylocal_auth_fails', String(nextFails));
+    } catch {}
+
+    if (nextFails >= 5) {
+      const lockUntil = Date.now() + 60 * 1000;
+      setLockoutEndTime(lockUntil);
+      try {
+        localStorage.setItem('paylocal_auth_lockout', String(lockUntil));
+      } catch {}
+      SecurityAuditService.logAction(
+        email,
+        'AUTH_LOCKED',
+        `VERROUILLAGE SYSTÈME (5 échecs consécutifs) : blocage préventif de 60 secondes appliqué au terminal.`,
+        'CRITICAL'
+      );
+      setAuthError('Sécurité bancaire : 5 échecs consécutifs détectés. Terminal consigné pendant 60 secondes.');
+    } else {
+      SecurityAuditService.logAction(
+        email,
+        'AUTH_FAILURE',
+        `Échec d'authentification (${nextFails}/5 tentatives autorisées) : ${reason}`,
+        'WARNING'
+      );
+      setAuthError(`${reason} (${5 - nextFails} tentative(s) restante(s) avant verrouillage de sécurité).`);
+    }
+  };
+
   const getCountryName = (c: CountryCode) => {
     switch (c) {
       case 'SN': return 'Sénégal (Dakar)';
@@ -151,24 +233,32 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteract
 
   const handleCredentialsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (remainingSeconds > 0) {
+      setAuthError(`Terminal temporairement verrouillé par mesure de sécurité bancaire. Veuillez patienter ${remainingSeconds} secondes.`);
+      return;
+    }
+
     setAuthError(null);
-    if (!email || !email.includes('@') || !email.includes('.')) {
+    const cleanEmail = InputSanitizer.cleanEmail(email);
+    const cleanPassword = InputSanitizer.cleanText(password);
+
+    if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
       setAuthError('Veuillez saisir une adresse email professionnelle valide (ex: contact@societe.sn).');
       return;
     }
-    if (!password || password.length < 4) {
+    if (!cleanPassword || cleanPassword.length < 4) {
       setAuthError('Le mot de passe doit comporter au moins 4 caractères.');
       return;
     }
 
     // Vérification du cloisonnement souverain territorial
-    const domainCheck = validateCountryDomainMatch(email, selectedCountry);
+    const domainCheck = validateCountryDomainMatch(cleanEmail, selectedCountry);
     if (!domainCheck.valid) {
       setAuthError(domainCheck.reason || 'Accès transfrontalier interdit.');
       SecurityAuditService.logAction(
-        email,
-        'DATA_EXPORTED',
-        `TENTATIVE TRANSFRONTALIÈRE BLOQUÉE : Compte (${email}) a tenté de pénétrer le territoire ${selectedCountry}. Accès rejeté.`,
+        cleanEmail,
+        'CROSS_BORDER_BLOCKED',
+        `TENTATIVE TRANSFRONTALIÈRE BLOQUÉE : Compte (${cleanEmail}) a tenté de pénétrer le territoire ${selectedCountry}. Accès rejeté.`,
         'CRITICAL'
       );
       return;
@@ -179,10 +269,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteract
 
   const handleMfaSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (remainingSeconds > 0) {
+      setAuthError(`Terminal temporairement consigné. Veuillez patienter ${remainingSeconds} secondes.`);
+      return;
+    }
+
     setAuthError(null);
+    const cleanEmail = InputSanitizer.cleanEmail(email);
 
     // Re-vérification de sécurité stricte
-    const domainCheck = validateCountryDomainMatch(email, selectedCountry);
+    const domainCheck = validateCountryDomainMatch(cleanEmail, selectedCountry);
     if (!domainCheck.valid) {
       setAuthError(domainCheck.reason || 'Accès transfrontalier interdit.');
       return;
@@ -193,8 +289,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteract
       setAuthError('Veuillez renseigner l\'intégralité des 6 chiffres du code OTP.');
       return;
     }
+
+    // Vérification de sécurité du code OTP (OTP attendu en démo : 842910)
+    if (code !== '842910') {
+      triggerFailedAttempt('Code OTP de vérification double facteur incorrect.');
+      return;
+    }
+
+    // Réinitialisation des tentatives après succès
+    setFailedAttempts(0);
+    setLockoutEndTime(null);
+    try {
+      localStorage.removeItem('paylocal_auth_fails');
+      localStorage.removeItem('paylocal_auth_lockout');
+    } catch {}
+
     onLogin({
-      email: email.trim().toLowerCase(),
+      email: cleanEmail,
       name: role === 'DIRECTEUR' ? 'Amadou Sall (Direction Générale)' : role === 'COMPTABLE' ? 'Cabinet Fiduciaire (Expert Agréé)' : 'Fatoumata Bâ (Ressources Humaines)',
       role,
       organization: org.name,
@@ -371,12 +482,24 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteract
                 ? 'Saisissez vos identifiants d\'entreprise. Votre espace territorial souverain est détecté automatiquement.'
                 : 'Un code de confirmation à usage unique (OTP) a été expédié sur votre terminal sécurisé.'}
             </p>
-            {authError && (
+            {remainingSeconds > 0 ? (
+              <div className="p-4 rounded-2xl bg-red-950/80 border border-red-500/50 text-red-200 text-xs flex items-start space-x-3 shadow-lg shadow-red-950/50 animate-shake">
+                <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5 animate-pulse" />
+                <div className="space-y-1">
+                  <strong className="text-white block font-black text-sm">
+                    ⛔ Terminal Consigné • Sécurité Anti-Brute-Force
+                  </strong>
+                  <p className="text-slate-300 leading-relaxed text-xs">
+                    5 échecs consécutifs détectés. Par mesure de conformité bancaire BCEAO, tout accès est temporairement suspendu pendant encore <span className="font-mono font-black text-red-400 text-sm">{remainingSeconds}s</span>.
+                  </p>
+                </div>
+              </div>
+            ) : authError ? (
               <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center space-x-2 animate-shake">
-                <span className="font-bold">⚠️</span>
+                <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
                 <span>{authError}</span>
               </div>
-            )}
+            ) : null}
           </div>
 
           {/* STEP 1 : IDENTIFIANTS */}
@@ -540,9 +663,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteract
               {/* Bouton de Soumission */}
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 font-black text-xs tracking-wider uppercase shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all flex items-center justify-center space-x-2 group"
+                disabled={remainingSeconds > 0}
+                className={`w-full py-3.5 rounded-xl font-black text-xs tracking-wider uppercase transition-all flex items-center justify-center space-x-2 group ${
+                  remainingSeconds > 0
+                    ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                    : 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30'
+                }`}
               >
-                <span>Accéder à la Console Sécurisée</span>
+                <span>{remainingSeconds > 0 ? `Terminal verrouillé (${remainingSeconds}s)` : 'Accéder à la Console Sécurisée'}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
 
@@ -639,9 +767,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteract
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 font-black text-xs tracking-wider uppercase shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center space-x-2"
+                disabled={remainingSeconds > 0}
+                className={`w-full py-3.5 rounded-xl font-black text-xs tracking-wider uppercase shadow-lg transition-all flex items-center justify-center space-x-2 ${
+                  remainingSeconds > 0
+                    ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                    : 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 shadow-emerald-500/20'
+                }`}
               >
-                <span>Confirmer & Ouvrir la Console</span>
+                <span>{remainingSeconds > 0 ? `Terminal consigné (${remainingSeconds}s)` : 'Confirmer & Ouvrir la Console'}</span>
                 <CheckCircle2 className="w-4 h-4" />
               </button>
 
