@@ -1,0 +1,23 @@
+Create a high-quality B2B product demonstration and explainer video for "PayLocal Africa" (https://paylocal-africa.vercel.app), the sovereign payroll and bulk mobile money payout SaaS for African enterprises.
+
+Language: French (Français)
+Voiceover: Formal, calm, authoritative, prestigious African French male voice (Directeur Financier style).
+Target Audience: CFOs (DAF), CEOs, and HR Directors in Senegal and Côte d'Ivoire.
+Aspect Ratio: 16:9 Landscape (Full HD 1080p).
+Pacing: Measured, professional, institutional.
+
+Script & Video Breakdown:
+Scene 1 (Hook): Contrast the old stressful way of paying salaries in Dakar (paper timesheets, Excel errors on IPRES/CSS/DGID taxes, carrying millions of FCFA in cash from banks with theft risks) with the modern era of automated FinTech.
+Scene 2 (Platform & Security): Introduce PayLocal Africa (https://paylocal-africa.vercel.app/). Highlight sovereign national isolation (Senegal & Côte d'Ivoire data confidentiality), BCEAO compliance, and 6-digit OTP two-factor authentication.
+Scene 3 (OHADA Payroll & Payslip): Showcase instant gross-to-net calculations, mid-month salary advances deducted automatically, and official OHADA-compliant payslips with labor inspection watermarks.
+Scene 4 (The Magic Moment - Bulk Payout): The hero moment! Bulk disbursement of 4,125,000 FCFA across 12 employees in 3 seconds flat via Wave Business and Orange Money with zero human error, anti-duplicate idempotency protection, and instant SMS notifications on workers' phones.
+Scene 5 (Tax Authority Compliance): Show 1-click export of the official State 102 ("État 102") for the Senegalese Tax Directorate (DGID) and Etax portal, saving days of accounting work and preventing audit penalties.
+Scene 6 (10-Year Legal Archive Vault): Present the digital archive vault conforming to the Senegalese Labor Code (Art. L.114) and OHADA regulations, sealed with immutable SHA-256 cryptographic fingerprints.
+Scene 7 (Call to Action): Invite leaders to try the free pilot on 5-10 employees for their next payroll cycle directly at https://paylocal-africa.vercel.app/ and book a 15-minute WhatsApp/Meet demo.
+
+Visual Elements:
+- High-tech enterprise software dashboards
+- Wave Mobile Money (cyan blue) and Orange Money (vibrant orange) branding
+- Dakar business offices and smiling African professionals
+- Smartphones displaying incoming mobile money alerts
+- Modern bold typography and English/French accurate subtitles
