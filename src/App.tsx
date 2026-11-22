@@ -12,6 +12,7 @@ import { EmployeeModal } from './components/EmployeeModal';
 import { TaxDeclarationExportModal } from './components/TaxDeclarationExportModal';
 import { SecurityCenterModal } from './components/SecurityCenterModal';
 import { LeadPipelineModal } from './components/LeadPipelineModal';
+import { ArchiveVaultModal } from './components/ArchiveVaultModal';
 import { LoginModal, UserSession } from './components/LoginModal';
 import { SecurityAuditService } from './security/auditLogger';
 import { EnvValidator } from './security/env';
@@ -42,6 +43,7 @@ export const App: React.FC = () => {
   const [showNewEmployee, setShowNewEmployee] = useState<boolean>(false);
   const [showSecurityCenter, setShowSecurityCenter] = useState<boolean>(false);
   const [showLeadPipeline, setShowLeadPipeline] = useState<boolean>(false);
+  const [showArchiveVault, setShowArchiveVault] = useState<boolean>(false);
 
   // Filtrer les salariés selon le pays sélectionné
   const currentEmployees = useMemo(() => {
@@ -221,6 +223,7 @@ export const App: React.FC = () => {
         onOpenNewEmployee={() => setShowNewEmployee(true)}
         onOpenSecurityCenter={() => setShowSecurityCenter(true)}
         onOpenLeadPipeline={() => setShowLeadPipeline(true)}
+        onOpenArchives={() => setShowArchiveVault(true)}
         isPayoutDone={isPayoutDone}
         isPrivacyMode={isPrivacyMode}
       />
@@ -352,6 +355,13 @@ export const App: React.FC = () => {
         <LeadPipelineModal
           userCountry={selectedCountry}
           onClose={() => setShowLeadPipeline(false)}
+        />
+      )}
+
+      {showArchiveVault && (
+        <ArchiveVaultModal
+          country={selectedCountry}
+          onClose={() => setShowArchiveVault(false)}
         />
       )}
 

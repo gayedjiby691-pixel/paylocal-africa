@@ -1,6 +1,6 @@
 import React from 'react';
 import { CountryCode } from '../engine/types';
-import { Building2, Calendar, ShieldCheck, SendHorizontal, FileText, UserPlus, Shield, Target, Lock } from 'lucide-react';
+import { Building2, Calendar, ShieldCheck, SendHorizontal, FileText, UserPlus, Shield, Target, Lock, FolderArchive } from 'lucide-react';
 
 interface HeaderProps {
   selectedCountry: CountryCode;
@@ -13,6 +13,7 @@ interface HeaderProps {
   onOpenNewEmployee: () => void;
   onOpenSecurityCenter: () => void;
   onOpenLeadPipeline: () => void;
+  onOpenArchives: () => void;
   isPayoutDone: boolean;
   isPrivacyMode: boolean;
 }
@@ -28,6 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenNewEmployee,
   onOpenSecurityCenter,
   onOpenLeadPipeline,
+  onOpenArchives,
   isPayoutDone,
   isPrivacyMode,
 }) => {
@@ -197,6 +199,16 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <FileText className="w-4 h-4 text-emerald-600" />
               <span>État Légal</span>
+            </button>
+
+            {/* Bouton Dossier d'Archives & Coffre-Fort */}
+            <button
+              onClick={onOpenArchives}
+              className="flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 transition-all shadow-sm"
+              title="Dossier d'Archives Légales & Coffre-Fort (Conforme OHADA 10 ans)"
+            >
+              <FolderArchive className="w-4 h-4 text-amber-600" />
+              <span>Archives</span>
             </button>
 
             {/* Bouton Payout Mobile Money Principal */}
