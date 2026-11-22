@@ -88,17 +88,34 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin }) => {
     }
   };
 
+  const [authError, setAuthError] = useState<string | null>(null);
+
   const org = getOrgDetails(detectedCountry);
 
   const handleCredentialsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setAuthError(null);
+    if (!email || !email.includes('@') || !email.includes('.')) {
+      setAuthError('Veuillez saisir une adresse email professionnelle valide (ex: contact@societe.sn).');
+      return;
+    }
+    if (!password || password.length < 4) {
+      setAuthError('Le mot de passe doit comporter au moins 4 caractères.');
+      return;
+    }
     setStep('MFA');
   };
 
   const handleMfaSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setAuthError(null);
+    const code = otpDigits.join('');
+    if (code.length !== 6) {
+      setAuthError('Veuillez renseigner l\'intégralité des 6 chiffres du code OTP.');
+      return;
+    }
     onLogin({
-      email,
+      email: email.trim().toLowerCase(),
       name: role === 'DIRECTEUR' ? 'Amadou Sall (Direction Générale)' : role === 'COMPTABLE' ? 'Cabinet Fiduciaire (Expert Agréé)' : 'Fatoumata Bâ (Ressources Humaines)',
       role,
       organization: org.name,
@@ -258,6 +275,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin }) => {
                 ? 'Saisissez vos identifiants d\'entreprise. Votre espace territorial souverain est détecté automatiquement.'
                 : 'Un code de confirmation à usage unique (OTP) a été expédié sur votre terminal sécurisé.'}
             </p>
+            {authError && (
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center space-x-2 animate-shake">
+                <span className="font-bold">⚠️</span>
+                <span>{authError}</span>
+              </div>
+            )}
           </div>
 
           {/* STEP 1 : IDENTIFIANTS */}
