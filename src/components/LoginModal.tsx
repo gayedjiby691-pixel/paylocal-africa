@@ -125,7 +125,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteract
       role,
       organization: org.name,
       country: detectedCountry,
-      allowedCountries: [detectedCountry],
+      allowedCountries: role === 'COMPTABLE' ? ['SN', 'CI', 'CM', 'BJ'] : [detectedCountry],
     });
   };
 
@@ -155,7 +155,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteract
       role: quickRole,
       organization: details.name,
       country: c,
-      allowedCountries: [c],
+      allowedCountries: quickRole === 'COMPTABLE' ? ['SN', 'CI', 'CM', 'BJ'] : [c],
     });
   };
 
@@ -353,6 +353,32 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteract
                     className="w-full pl-10 pr-4 py-3 text-xs font-semibold rounded-xl border border-slate-800 bg-slate-950 text-white placeholder-slate-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:outline-none transition-all"
                     placeholder="nom@votre-societe.sn"
                   />
+                </div>
+
+                {/* Sélecteur de Territoire Rapide pour Test & Démonstration */}
+                <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                  <span className="text-[10px] text-slate-400 font-medium">Détection automatique :</span>
+                  {[
+                    { code: 'SN' as const, flag: '🇸🇳', name: 'Sénégal', demoEmail: 'direction@dakar-securite.sn' },
+                    { code: 'CI' as const, flag: '🇨🇮', name: 'Côte d\'Ivoire', demoEmail: 'direction@ivoire-gardiennage.ci' },
+                    { code: 'CM' as const, flag: '🇨🇲', name: 'Cameroun', demoEmail: 'direction@douala-logistique.cm' },
+                    { code: 'BJ' as const, flag: '🇧🇯', name: 'Bénin', demoEmail: 'direction@cotonou-maintenance.bj' },
+                  ].map((p) => (
+                    <button
+                      key={p.code}
+                      type="button"
+                      onClick={() => setEmail(p.demoEmail)}
+                      className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition-all flex items-center space-x-1 ${
+                        detectedCountry === p.code
+                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-sm'
+                          : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-white'
+                      }`}
+                      title={`Tester le territoire ${p.name}`}
+                    >
+                      <span>{p.flag}</span>
+                      <span>{p.name}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
 

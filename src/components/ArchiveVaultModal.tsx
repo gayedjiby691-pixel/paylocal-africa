@@ -164,6 +164,78 @@ export const ArchiveVaultModal: React.FC<ArchiveVaultModalProps> = ({ country, o
         { name: 'Bordereau_Recapitulatif_Annuel_IPRES_CSS_2025.pdf', type: 'RECU_PAYOUT', size: '2.1 Mo' },
       ],
     },
+
+    // 🇨🇮 CÔTE D'IVOIRE
+    {
+      id: 'ARCH-2026-04-CI',
+      periodLabel: 'Avril 2026',
+      year: 2026,
+      month: 'Avril',
+      country: 'CI',
+      closingDate: '30 Avril 2026 à 18:30:15',
+      closedBy: 'Marie-Pascale Bamba (Direction Financière)',
+      totalEmployees: 8,
+      totalGrossSalary: 3800000,
+      totalNetDisbursed: 3150000,
+      totalTaxesDGID: 310000,
+      totalSocialIPRES_CSS: 490000,
+      payoutProvider: 'Wave & Orange Money CI',
+      sha256Seal: '8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b9a8f7e',
+      documents: [
+        { name: 'Bordereau_CNPS_CMU_Avril_2026.pdf', type: 'RECU_PAYOUT', size: '1.2 Mo' },
+        { name: 'Livre_de_Paie_Officiel_CI_Avril_2026.pdf', type: 'LIVRE_PAIE', size: '1.5 Mo' },
+        { name: 'Declaration_DGI_IS_CN_IGR_Avril_2026.csv', type: 'ETAT_102', size: '310 Ko' },
+        { name: 'Pack_8_Bulletins_Scelles_Abidjan_2026.zip', type: 'BULLETINS_ZIP', size: '3.1 Mo' },
+      ],
+    },
+
+    // 🇨🇲 CAMEROUN (CEMAC)
+    {
+      id: 'ARCH-2026-04-CM',
+      periodLabel: 'Avril 2026',
+      year: 2026,
+      month: 'Avril',
+      country: 'CM',
+      closingDate: '30 Avril 2026 à 17:45:00',
+      closedBy: 'Samuel Eto\'o Ndong (Direction Générale)',
+      totalEmployees: 6,
+      totalGrossSalary: 2950000,
+      totalNetDisbursed: 2480000,
+      totalTaxesDGID: 240000,
+      totalSocialIPRES_CSS: 310000,
+      payoutProvider: 'MTN Mobile Money & Orange Money',
+      sha256Seal: '5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b',
+      documents: [
+        { name: 'DIPE_Officiel_DGI_Cameroun_Avril_2026.csv', type: 'ETAT_102', size: '290 Ko' },
+        { name: 'Bordereau_CNPS_CFC_FNE_Cameroun_2026.pdf', type: 'RECU_PAYOUT', size: '1.1 Mo' },
+        { name: 'Grand_Livre_de_Paie_Douala_Avril_2026.pdf', type: 'LIVRE_PAIE', size: '1.3 Mo' },
+        { name: 'Pack_6_Bulletins_Scelles_Cameroun_2026.zip', type: 'BULLETINS_ZIP', size: '2.8 Mo' },
+      ],
+    },
+
+    // 🇧🇯 BÉNIN (UEMOA)
+    {
+      id: 'ARCH-2026-04-BJ',
+      periodLabel: 'Avril 2026',
+      year: 2026,
+      month: 'Avril',
+      country: 'BJ',
+      closingDate: '30 Avril 2026 à 18:10:00',
+      closedBy: 'Cabinet Comptable Agréé Cotonou',
+      totalEmployees: 5,
+      totalGrossSalary: 1850000,
+      totalNetDisbursed: 1580000,
+      totalTaxesDGID: 140000,
+      totalSocialIPRES_CSS: 230000,
+      payoutProvider: 'MTN MoMo & Moov Money Bénin',
+      sha256Seal: '2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b',
+      documents: [
+        { name: 'Bordereau_Unique_CNSS_Benin_Avril_2026.pdf', type: 'RECU_PAYOUT', size: '980 Ko' },
+        { name: 'Declaration_IPTS_VPS_DGI_Benin_2026.csv', type: 'ETAT_102', size: '220 Ko' },
+        { name: 'Livre_de_Paie_Officiel_Cotonou_Avril_2026.pdf', type: 'LIVRE_PAIE', size: '1.1 Mo' },
+        { name: 'Pack_5_Bulletins_Scelles_Benin_2026.zip', type: 'BULLETINS_ZIP', size: '2.2 Mo' },
+      ],
+    },
   ];
 
   const filteredArchives = mockArchives.filter((a) => {
@@ -213,7 +285,11 @@ export const ArchiveVaultModal: React.FC<ArchiveVaultModalProps> = ({ country, o
               <p className="text-xs text-slate-400">
                 {country === 'SN' 
                   ? 'Historique certifié des paies, états 102 (DGID), bordereaux IPRES/CSS et déboursements Wave.'
-                  : 'Historique certifié des paies, bordereaux DGI, cotisations CNPS/CMU et déboursements MoMo.'}
+                  : country === 'CI'
+                  ? 'Historique certifié des paies, bordereaux DGI, cotisations CNPS/CMU et déboursements Wave/OM.'
+                  : country === 'CM'
+                  ? 'Historique certifié des paies, DIPE fiscal, cotisations CNPS/CFC et déboursements MTN MoMo.'
+                  : 'Historique certifié des paies, bordereaux DGI, cotisations CNSS/VPS et déboursements MoMo.'}
               </p>
             </div>
           </div>
@@ -323,11 +399,15 @@ export const ArchiveVaultModal: React.FC<ArchiveVaultModalProps> = ({ country, o
                       <strong className="text-slate-800 font-mono text-xs">{formatMoney(archive.totalGrossSalary)}</strong>
                     </div>
                     <div>
-                      <span className="text-[10px] font-bold text-slate-400 block uppercase">Retenue DGID (IRPP)</span>
+                      <span className="text-[10px] font-bold text-slate-400 block uppercase">
+                        {country === 'SN' ? 'Retenue DGID (IRPP)' : country === 'CI' ? 'Impôts DGI (IS/CN/IGR)' : country === 'CM' ? 'Retenue DGI (IRPP/CAC)' : 'Retenue DGI (IPTS)'}
+                      </span>
                       <strong className="text-amber-700 font-mono text-xs">{formatMoney(archive.totalTaxesDGID)}</strong>
                     </div>
                     <div>
-                      <span className="text-[10px] font-bold text-slate-400 block uppercase">Charges IPRES & CSS</span>
+                      <span className="text-[10px] font-bold text-slate-400 block uppercase">
+                        {country === 'SN' ? 'Charges IPRES & CSS' : country === 'CI' ? 'Charges CNPS & CMU' : country === 'CM' ? 'Charges CNPS & CFC' : 'Charges CNSS & VPS'}
+                      </span>
                       <strong className="text-blue-700 font-mono text-xs">{formatMoney(archive.totalSocialIPRES_CSS)}</strong>
                     </div>
                   </div>
