@@ -14,9 +14,11 @@ import {
   ChevronRight, 
   ArrowLeft,
   RefreshCw,
-  Fingerprint
+  Fingerprint,
+  Sparkles
 } from 'lucide-react';
 import { CountryCode } from '../engine/types';
+import { RequestDemoModal } from './RequestDemoModal';
 
 export interface UserSession {
   email: string;
@@ -39,6 +41,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin }) => {
   const [otpDigits, setOtpDigits] = useState<string[]>(['8', '4', '2', '9', '1', '0']);
   const [step, setStep] = useState<'CREDENTIALS' | 'MFA'>('CREDENTIALS');
   const [isRememberDevice, setIsRememberDevice] = useState(true);
+  const [showDemoModal, setShowDemoModal] = useState(false);
 
   // Détection 100% Automatique, Furtive et Souveraine du Pays (Zero fuite de liste de pays)
   const detectedCountry: CountryCode = useMemo(() => {
@@ -233,6 +236,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin }) => {
             </div>
           </div>
 
+          {/* Bouton Appel d'Action Démo Rapide */}
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={() => setShowDemoModal(true)}
+              className="w-full py-3 px-4 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs transition-all flex items-center justify-center space-x-2 shadow-lg shadow-emerald-500/10 group"
+            >
+              <Sparkles className="w-4 h-4 text-emerald-400 group-hover:rotate-12 transition-transform" />
+              <span>Planifier une démo personnalisée (15 min)</span>
+            </button>
+          </div>
+
         </div>
 
         {/* Footer de Sécurité & Réglementation */}
@@ -406,7 +421,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin }) => {
               </button>
 
               {/* Section Démonstration Institutionnelle Sécurisée */}
-              <div className="pt-4 border-t border-slate-800/80">
+              <div className="pt-4 border-t border-slate-800/80 space-y-3">
                 <button
                   type="button"
                   onClick={() => handleQuickEnterpriseLogin(email, role, role === 'DIRECTEUR' ? 'Directeur Général' : role === 'COMPTABLE' ? 'Expert-Comptable Agréé' : 'Responsable RH', detectedCountry)}
@@ -425,6 +440,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin }) => {
                   </div>
                   <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
                 </button>
+
+                {/* Bouton pour nouveaux prospects */}
+                <div className="text-center pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowDemoModal(true)}
+                    className="inline-flex items-center space-x-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors py-1 px-3 rounded-lg hover:bg-emerald-500/10"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Pas encore d'identifiant ? Demander un pilote gratuit</span>
+                  </button>
+                </div>
               </div>
 
             </form>
@@ -494,6 +521,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin }) => {
         </div>
 
       </div>
+
+      {showDemoModal && (
+        <RequestDemoModal onClose={() => setShowDemoModal(false)} />
+      )}
 
     </div>
   );
