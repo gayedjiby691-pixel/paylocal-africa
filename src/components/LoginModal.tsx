@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { CountryCode } from '../engine/types';
 import { RequestDemoModal } from './RequestDemoModal';
+import { SecurityAuditService } from '../security/auditLogger';
 
 export interface UserSession {
   email: string;
@@ -96,6 +97,56 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteract
 
   const [authError, setAuthError] = useState<string | null>(null);
 
+  const getCountryName = (c: CountryCode) => {
+    switch (c) {
+      case 'SN': return 'Sénégal (Dakar)';
+      case 'CI': return 'Côte d\'Ivoire (Abidjan)';
+      case 'CM': return 'Cameroun (Douala)';
+      case 'BJ': return 'Bénin (Cotonou)';
+    }
+  };
+
+  // Contrôle strict de frontière territoriale (Boundary Enforcement)
+  const validateCountryDomainMatch = (emailInput: string, targetCountry: CountryCode): { valid: boolean; reason?: string } => {
+    const clean = emailInput.toLowerCase().trim();
+    
+    // Détection de tentative transfrontalière interdite :
+    const isSnDomain = clean.endsWith('.sn') || clean.includes('.sn/') || clean.includes('@dakar') || clean.includes('senegal');
+    const isCiDomain = clean.endsWith('.ci') || clean.includes('.ci/') || clean.includes('@abidjan') || clean.includes('ivoire');
+    const isCmDomain = clean.endsWith('.cm') || clean.includes('.cm/') || clean.includes('@douala') || clean.includes('cameroun');
+    const isBjDomain = clean.endsWith('.bj') || clean.includes('.bj/') || clean.includes('@cotonou') || clean.includes('benin');
+
+    if (isSnDomain && targetCountry !== 'SN') {
+      return {
+        valid: false,
+        reason: `⛔ ACCÈS STRICTEMENT REFUSÉ (ISOLEMENT SOUVERAIN) : Votre compte d'entreprise est domicilié au Sénégal (.sn). Vous n'avez pas l'autorisation d'accéder au territoire du ${getCountryName(targetCountry)} pour prévenir les risques de fuite et de piratage transfrontalier.`,
+      };
+    }
+
+    if (isCiDomain && targetCountry !== 'CI') {
+      return {
+        valid: false,
+        reason: `⛔ ACCÈS STRICTEMENT REFUSÉ (ISOLEMENT SOUVERAIN) : Votre compte d'entreprise est domicilié en Côte d'Ivoire (.ci). Vous ne pouvez pas accéder à l'espace souverain du ${getCountryName(targetCountry)}.`,
+      };
+    }
+
+    if (isCmDomain && targetCountry !== 'CM') {
+      return {
+        valid: false,
+        reason: `⛔ ACCÈS STRICTEMENT REFUSÉ (ISOLEMENT SOUVERAIN) : Votre compte d'entreprise est domicilié au Cameroun (.cm). Vous ne pouvez pas accéder à l'espace souverain du ${getCountryName(targetCountry)}.`,
+      };
+    }
+
+    if (isBjDomain && targetCountry !== 'BJ') {
+      return {
+        valid: false,
+        reason: `⛔ ACCÈS STRICTEMENT REFUSÉ (ISOLEMENT SOUVERAIN) : Votre compte d'entreprise est domicilié au Bénin (.bj). Vous ne pouvez pas accéder à l'espace souverain du ${getCountryName(targetCountry)}.`,
+      };
+    }
+
+    return { valid: true };
+  };
+
   const org = getOrgDetails(selectedCountry);
 
   const handleCredentialsSubmit = (e: React.FormEvent) => {
@@ -109,12 +160,34 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteract
       setAuthError('Le mot de passe doit comporter au moins 4 caractères.');
       return;
     }
+
+    // Vérification du cloisonnement souverain territorial
+    const domainCheck = validateCountryDomainMatch(email, selectedCountry);
+    if (!domainCheck.valid) {
+      setAuthError(domainCheck.reason || 'Accès transfrontalier interdit.');
+      SecurityAuditService.logAction(
+        email,
+        'DATA_EXPORTED',
+        `TENTATIVE TRANSFRONTALIÈRE BLOQUÉE : Compte (${email}) a tenté de pénétrer le territoire ${selectedCountry}. Accès rejeté.`,
+        'CRITICAL'
+      );
+      return;
+    }
+
     setStep('MFA');
   };
 
   const handleMfaSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
+
+    // Re-vérification de sécurité stricte
+    const domainCheck = validateCountryDomainMatch(email, selectedCountry);
+    if (!domainCheck.valid) {
+      setAuthError(domainCheck.reason || 'Accès transfrontalier interdit.');
+      return;
+    }
+
     const code = otpDigits.join('');
     if (code.length !== 6) {
       setAuthError('Veuillez renseigner l\'intégralité des 6 chiffres du code OTP.');
@@ -149,6 +222,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onLogin, onStartInteract
     quickName: string, 
     c: CountryCode
   ) => {
+    const domainCheck = validateCountryDomainMatch(quickEmail, c);
+    if (!domainCheck.valid) {
+      setAuthError(domainCheck.reason || 'Accès transfrontalier interdit.');
+      return;
+    }
     const details = getOrgDetails(c);
     onLogin({
       email: quickEmail,
