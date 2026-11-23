@@ -99,6 +99,41 @@ export const EnterpriseBrandingModal: React.FC<EnterpriseBrandingModalProps> = (
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6 flex-1 text-slate-800">
           
+          {/* Raccourci Démo Immédiate Spécial BaEauBab Sénégal */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+            <div className="space-y-0.5">
+              <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 block">
+                ⚡ Préréglage Immédiat • Présentation Client
+              </span>
+              <h4 className="text-xs font-black text-slate-900">
+                Profil Prêt : BaEauBab Sénégal SARL (Dakar)
+              </h4>
+              <p className="text-[11px] text-slate-600">
+                Charge en 1 clic la marque, le thème bleu minéral, le cachet officiel et le SMS Wave/Orange Money « BAEAUBAB ».
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setForm({
+                  companyName: 'BaEauBab Sénégal SARL',
+                  tagline: 'Embouteillage, Nanofiltration & Distribution de Bonbonnes 19L',
+                  legalId: 'NINEA : 002198453 • RCCM : SN-DKR-1997-B-2410',
+                  headquarters: 'Mermoz - Sacré-Cœur, Dakar (Sénégal)',
+                  phone: '+221 33 865 40 40',
+                  brandColor: 'BLUE',
+                  logoInitial: 'B',
+                  whiteLabelMode: false,
+                  smsSenderName: 'BAEAUBAB',
+                  customStampTitle: 'Direction Générale • BaEauBab Sénégal',
+                });
+              }}
+              className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md shadow-blue-600/20 transition-all flex items-center justify-center space-x-1.5 shrink-0"
+            >
+              <span>💧 Charger BaEauBab</span>
+            </button>
+          </div>
+
           {/* Section 1 : Palette & Touche Visuelle */}
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
