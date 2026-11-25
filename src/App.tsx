@@ -206,31 +206,25 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100/70 text-slate-800 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-slate-100/70 text-slate-800 flex flex-col font-sans selection:bg-emerald-500 selection:text-white w-full overflow-x-hidden">
       
       {/* Barre Supérieure Utilisateur Connecté */}
-      <div className="bg-slate-900 text-slate-300 text-xs px-4 sm:px-8 py-1.5 flex items-center justify-between border-b border-slate-800">
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-1.5 text-emerald-400 font-bold">
+      <div className="bg-slate-900 text-slate-300 text-xs px-3 sm:px-6 py-1.5 flex items-center justify-between border-b border-slate-800 w-full overflow-hidden">
+        <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+          <div className="flex items-center space-x-1.5 text-emerald-400 font-bold shrink-0">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Session Sécurisée TLS 1.3</span>
+            <span className="text-[11px] sm:text-xs">TLS 1.3</span>
           </div>
-          <span className="text-slate-600 hidden sm:inline">•</span>
-          <span className="text-slate-400 hidden sm:inline font-mono">Tenant: {currentUser.organization}</span>
+          <span className="text-slate-600 hidden md:inline">•</span>
+          <span className="text-slate-400 hidden md:inline font-mono truncate text-[11px] max-w-[200px] lg:max-w-xs">
+            Tenant: {branding.companyName || currentUser.organization}
+          </span>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={() => setShowLeadPipeline(true)}
-            className="flex items-center space-x-1 text-amber-400 hover:text-amber-300 font-bold transition-colors mr-2"
-          >
-            <Target className="w-3.5 h-3.5" />
-            <span>Prospects Qualifiés ({selectedCountry === 'SN' ? '10' : '12'})</span>
-          </button>
-
-          <div className="flex items-center space-x-1.5 text-white font-medium">
-            <User className="w-3.5 h-3.5 text-emerald-400" />
-            <span>{currentUser.name}</span>
+        <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+          <div className="flex items-center space-x-1.5 text-white font-medium text-xs">
+            <User className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span className="truncate max-w-[120px] sm:max-w-none">{currentUser.name.split(' ')[0]}</span>
             <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold text-[10px]">
               {currentUser.role}
             </span>
@@ -238,7 +232,7 @@ export const App: React.FC = () => {
 
           <button
             onClick={handleLogout}
-            className="flex items-center space-x-1 text-slate-400 hover:text-red-400 font-semibold transition-colors pl-2 border-l border-slate-800"
+            className="flex items-center space-x-1 text-slate-400 hover:text-red-400 font-semibold transition-colors pl-2 border-l border-slate-800 text-xs"
             title="Se déconnecter"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -301,7 +295,7 @@ export const App: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center space-x-2.5 text-xs shrink-0 relative z-10">
+          <div className="flex flex-wrap items-center gap-2 text-xs relative z-10">
             <button
               onClick={() => setShowBrandingModal(true)}
               className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 font-extrabold px-3 py-2.5 rounded-xl border border-purple-500/40 transition-all flex items-center space-x-1.5 shadow-sm hover:scale-[1.02]"
