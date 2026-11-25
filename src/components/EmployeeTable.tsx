@@ -1,6 +1,6 @@
 import React from 'react';
 import { EmployeeProfile, PayslipResult } from '../engine/types';
-import { FileText, HandCoins, CheckCircle2, Clock, Smartphone, ChevronRight } from 'lucide-react';
+import { FileText, HandCoins, CheckCircle2, Clock, Smartphone, ChevronRight, UserPlus } from 'lucide-react';
 import { DataMasking } from '../security/masking';
 
 interface EmployeeTableProps {
@@ -9,6 +9,7 @@ interface EmployeeTableProps {
   salaryAdvances: Map<string, number>;
   onSelectEmployeeForPayslip: (emp: EmployeeProfile) => void;
   onOpenAdvanceModal: (emp: EmployeeProfile) => void;
+  onOpenNewEmployee?: () => void;
   isPayoutDone: boolean;
   isPrivacyMode?: boolean;
 }
@@ -19,6 +20,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
   salaryAdvances,
   onSelectEmployeeForPayslip,
   onOpenAdvanceModal,
+  onOpenNewEmployee,
   isPayoutDone,
   isPrivacyMode = false,
 }) => {
@@ -94,18 +96,31 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center space-x-2 text-xs">
-          <span className="text-slate-400 font-medium">Statut de la période :</span>
-          {isPayoutDone ? (
-            <span className="inline-flex items-center text-emerald-800 font-bold bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">
-              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 text-emerald-600" />
-              Salaires Payés via API
-            </span>
-          ) : (
-            <span className="inline-flex items-center text-amber-800 font-bold bg-amber-50 px-3 py-1 rounded-xl border border-amber-200">
-              <Clock className="w-3.5 h-3.5 mr-1.5 text-amber-600" />
-              Prêt pour déboursement
-            </span>
+        <div className="flex items-center space-x-2.5 text-xs">
+          <div className="flex items-center space-x-1.5">
+            <span className="text-slate-400 font-medium hidden sm:inline">Période :</span>
+            {isPayoutDone ? (
+              <span className="inline-flex items-center text-emerald-800 font-bold bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200">
+                <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-600" />
+                Payé via API
+              </span>
+            ) : (
+              <span className="inline-flex items-center text-amber-800 font-bold bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-200">
+                <Clock className="w-3.5 h-3.5 mr-1 text-amber-600" />
+                Prêt pour payout
+              </span>
+            )}
+          </div>
+
+          {onOpenNewEmployee && (
+            <button
+              onClick={onOpenNewEmployee}
+              className="flex items-center space-x-1.5 text-xs font-black text-white bg-slate-900 hover:bg-slate-800 px-3.5 py-1.5 rounded-xl transition-all shadow-sm hover:scale-[1.02] shrink-0"
+              title="Ajouter un nouveau salarié"
+            >
+              <UserPlus className="w-3.5 h-3.5 text-emerald-400" />
+              <span>+ Nouveau Salarié</span>
+            </button>
           )}
         </div>
       </div>

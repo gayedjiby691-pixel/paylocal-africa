@@ -346,6 +346,7 @@ export const App: React.FC = () => {
           salaryAdvances={salaryAdvances}
           onSelectEmployeeForPayslip={setSelectedPayslipEmp}
           onOpenAdvanceModal={setSelectedAdvanceEmp}
+          onOpenNewEmployee={() => setShowNewEmployee(true)}
           isPayoutDone={isPayoutDone}
           isPrivacyMode={isPrivacyMode}
         />

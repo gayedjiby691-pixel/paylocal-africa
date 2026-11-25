@@ -159,6 +159,16 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="hidden xl:inline text-xs">Archives</span>
             </button>
 
+            {/* BOUTON AJOUT SALARIÉ (TOUJOURS VISIBLE) */}
+            <button
+              onClick={onOpenNewEmployee}
+              className="flex items-center space-x-1 text-xs font-bold px-2 sm:px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 shadow-sm transition-all shrink-0"
+              title="Ajouter un nouveau salarié"
+            >
+              <UserPlus className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="hidden sm:inline">+ Salarié</span>
+            </button>
+
             {/* Bouton Personnalisation de Marque (La Touche Sur-Mesure) */}
             {onOpenBranding && (
               <button
