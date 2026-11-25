@@ -12,7 +12,6 @@ import { BulkPayoutModal } from './components/BulkPayoutModal';
 import { EmployeeModal } from './components/EmployeeModal';
 import { TaxDeclarationExportModal } from './components/TaxDeclarationExportModal';
 import { SecurityCenterModal } from './components/SecurityCenterModal';
-import { LeadPipelineModal } from './components/LeadPipelineModal';
 import { ArchiveVaultModal } from './components/ArchiveVaultModal';
 import { InteractiveTourModal } from './components/InteractiveTourModal';
 import { RequestDemoModal } from './components/RequestDemoModal';
@@ -20,7 +19,7 @@ import { EnterpriseBrandingModal } from './components/EnterpriseBrandingModal';
 import { LoginModal, UserSession } from './components/LoginModal';
 import { SecurityAuditService } from './security/auditLogger';
 import { EnvValidator } from './security/env';
-import { Sparkles, ShieldCheck, LogOut, User, Target, Palette } from 'lucide-react';
+import { Sparkles, ShieldCheck, LogOut, User, Palette } from 'lucide-react';
 
 export const App: React.FC = () => {
   useEffect(() => {
@@ -46,7 +45,6 @@ export const App: React.FC = () => {
   const [showTaxExport, setShowTaxExport] = useState<boolean>(false);
   const [showNewEmployee, setShowNewEmployee] = useState<boolean>(false);
   const [showSecurityCenter, setShowSecurityCenter] = useState<boolean>(false);
-  const [showLeadPipeline, setShowLeadPipeline] = useState<boolean>(false);
   const [showArchiveVault, setShowArchiveVault] = useState<boolean>(false);
   const [showInteractiveTour, setShowInteractiveTour] = useState<boolean>(false);
   const [showDemoRequest, setShowDemoRequest] = useState<boolean>(false);
@@ -54,6 +52,16 @@ export const App: React.FC = () => {
 
   // La « Touche » Sur-Mesure de l'entreprise (Marque, Logo, Couleurs, Cachet)
   const [branding, setBranding] = useState<EnterpriseBranding>(() => {
+    try {
+      const saved = localStorage.getItem('paylocal_branding_SN');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (!parsed.companyName?.includes('BaEauBab') && parsed.smsSenderName !== 'BAEAUBAB') {
+          return parsed;
+        }
+        localStorage.removeItem('paylocal_branding_SN');
+      }
+    } catch {}
     return defaultBrandings.SN;
   });
 
@@ -61,7 +69,13 @@ export const App: React.FC = () => {
     const saved = localStorage.getItem(`paylocal_branding_${selectedCountry}`);
     if (saved) {
       try {
-        setBranding(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        if (parsed.companyName?.includes('BaEauBab') || parsed.smsSenderName === 'BAEAUBAB') {
+          localStorage.removeItem(`paylocal_branding_${selectedCountry}`);
+          setBranding(defaultBrandings[selectedCountry] || defaultBrandings.SN);
+          return;
+        }
+        setBranding(parsed);
         return;
       } catch (e) {}
     }
@@ -266,7 +280,6 @@ export const App: React.FC = () => {
         onOpenTaxExport={() => setShowTaxExport(true)}
         onOpenNewEmployee={() => setShowNewEmployee(true)}
         onOpenSecurityCenter={() => setShowSecurityCenter(true)}
-        onOpenLeadPipeline={() => setShowLeadPipeline(true)}
         onOpenArchives={() => setShowArchiveVault(true)}
         onOpenTour={() => setShowInteractiveTour(true)}
         isPayoutDone={isPayoutDone}
@@ -289,9 +302,7 @@ export const App: React.FC = () => {
               </h1>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
-              {selectedCountry === 'SN'
-                ? 'Campagne territoriale prête : 10 entreprises et cabinets qualifiés à Dakar avec coordonnées directes WhatsApp.'
-                : 'Campagne territoriale prête : 12 entreprises et cabinets qualifiés à Abidjan avec coordonnées directes WhatsApp.'}
+              Plateforme souveraine de paie conforme OHADA : automatisation des cotisations sociales et déboursement groupé instantané sur Wave et Orange Money.
             </p>
           </div>
 
@@ -311,13 +322,6 @@ export const App: React.FC = () => {
             >
               <Sparkles className="w-4 h-4 text-emerald-400" />
               <span>🎬 Démo Guidée</span>
-            </button>
-            <button
-              onClick={() => setShowLeadPipeline(true)}
-              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-orange-500/20 flex items-center space-x-2 hover:scale-[1.02]"
-            >
-              <Target className="w-4 h-4" />
-              <span>Ouvrir Prospects ({selectedCountry === 'SN' ? '10' : '12'})</span>
             </button>
             <button
               onClick={() => setShowBulkPayout(true)}
@@ -411,13 +415,6 @@ export const App: React.FC = () => {
           isPrivacyMode={isPrivacyMode}
           onTogglePrivacyMode={() => setIsPrivacyMode(!isPrivacyMode)}
           onClose={() => setShowSecurityCenter(false)}
-        />
-      )}
-
-      {showLeadPipeline && (
-        <LeadPipelineModal
-          userCountry={selectedCountry}
-          onClose={() => setShowLeadPipeline(false)}
         />
       )}
 

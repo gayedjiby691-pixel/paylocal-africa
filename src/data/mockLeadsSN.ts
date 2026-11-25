@@ -14,21 +14,6 @@ export interface ProspectSN {
 }
 
 export const initialLeadsSN: ProspectSN[] = [
-  // 🌟 CLIENT CIBLE PRIORITAIRE DU JOUR (PRÉSENTATION PRÉVUE À MERMOZ)
-  {
-    id: 'lead-sn-000',
-    companyName: 'BaEauBab Sénégal (Purification & Bonbonnes 19L)',
-    sector: 'BTP_NETTOYAGE',
-    district: 'Mermoz - Sacré-Cœur, Dakar',
-    phone: '+221 33 865 40 40',
-    whatsappPhone: '221338654040',
-    email: 'baeaubab@baeaubab.sn',
-    estimatedEmployees: '80 - 150 livreurs & techniciens',
-    contactPerson: 'Directeur Général / Direction Financière (DAF)',
-    keyPainPoint: 'Paiement instantané des chauffeurs-livreurs 19L sur le terrain via Wave et gestion automatisée des acomptes du 15 du mois.',
-    status: 'DEMO_PREVUE',
-    personalizedMessage: 'Bonjour Direction BaEauBab Sénégal, nous avons préparé la console souveraine PayLocal Africa configurée spécialement pour votre flotte de livreurs 19L et techniciens fontaines à Dakar. Au plaisir de vous présenter la solution aujourd\'hui à Mermoz !'
-  },
   // 1. SÉCURITÉ & GARDIENNAGE À DAKAR (Gros volume Wave & Orange Money)
   {
     id: 'lead-sn-001',

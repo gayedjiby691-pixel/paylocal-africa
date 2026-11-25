@@ -1,6 +1,6 @@
 import React from 'react';
 import { CountryCode, EnterpriseBranding } from '../engine/types';
-import { Building2, Calendar, ShieldCheck, SendHorizontal, FileText, UserPlus, Shield, Target, Lock, FolderArchive, Play, Palette } from 'lucide-react';
+import { Building2, Calendar, ShieldCheck, SendHorizontal, FileText, UserPlus, Shield, Lock, FolderArchive, Play, Palette } from 'lucide-react';
 
 interface HeaderProps {
   selectedCountry: CountryCode;
@@ -14,7 +14,6 @@ interface HeaderProps {
   onOpenTaxExport: () => void;
   onOpenNewEmployee: () => void;
   onOpenSecurityCenter: () => void;
-  onOpenLeadPipeline: () => void;
   onOpenArchives: () => void;
   onOpenTour: () => void;
   isPayoutDone: boolean;
@@ -33,7 +32,6 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenTaxExport,
   onOpenNewEmployee,
   onOpenSecurityCenter,
-  onOpenLeadPipeline,
   onOpenArchives,
   onOpenTour,
   isPayoutDone,
@@ -122,19 +120,6 @@ export const Header: React.FC<HeaderProps> = ({
                 Confiné
               </span>
             </div>
-
-            {/* BOUTON PROSPECTION (LEADS CRM) */}
-            <button
-              onClick={onOpenLeadPipeline}
-              className="flex items-center space-x-1 text-xs font-bold px-2 sm:px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-sm transition-all shrink-0"
-              title="Ouvrir le pipeline de prospection"
-            >
-              <Target className="w-3.5 h-3.5" />
-              <span className="hidden md:inline text-xs">Prospects</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-white/25 text-white font-mono text-[10px]">
-                {selectedCountry === 'SN' ? '10' : '12'}
-              </span>
-            </button>
 
             {/* Bouton Sécurité & Audit */}
             <button
